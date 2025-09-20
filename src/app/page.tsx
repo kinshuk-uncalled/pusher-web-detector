@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+declare global {
+  interface Window {
+    PusherPushNotifications: {
+      Client: new (options: { instanceId: string | undefined }) => {
+        start: () => Promise<void>;
+        addDeviceInterest: (interest: string) => Promise<void>;
+      };
+    };
+  }
+}
+
 export default function Home() {
   const [isPusherSupported, setIsPusherSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -34,8 +45,8 @@ export default function Home() {
   function initializeBeams() {
     navigator.serviceWorker.register("/service-worker.js")
       .then(() => {
-        const beamsClient = new (window as any).PusherPushNotifications.Client({
-          instanceId: "d6370761-8bae-4554-bf96-33d74a0a4d66",
+        const beamsClient = new window.PusherPushNotifications.Client({
+          instanceId: process.env.NEXT_PUBLIC_PUSHER_BEAMS_INSTANCE_ID,
         });
 
         beamsClient.start()

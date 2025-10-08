@@ -41,8 +41,8 @@ export default function Home() {
     else if (userAgent.indexOf('iPod') !== -1) detectedOS = 'iOS';
     else if (userAgent.indexOf('Win') !== -1) detectedOS = 'Windows';
     else if (userAgent.indexOf('Mac') !== -1) detectedOS = 'macOS';
-    else if (userAgent.indexOf('Linux') !== -1) detectedOS = 'Linux';
     else if (userAgent.indexOf('Android') !== -1) detectedOS = 'Android';
+    else if (userAgent.indexOf('Linux') !== -1) detectedOS = 'Linux';
     setOs(detectedOS);
 
     // Detect Browser

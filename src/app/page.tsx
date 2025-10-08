@@ -28,6 +28,8 @@ export default function Home() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [os, setOs] = useState<string>('');
   const [browser, setBrowser] = useState<string>('');
+  const [osPlatform, setOsPlatform] = useState<string>('');
+  const [osRelease, setOsRelease] = useState<string>('');
   const [osIcon, setOsIcon] = useState(faDesktop);
   const [browserIcon, setBrowserIcon] = useState(faGlobe);
 
@@ -89,6 +91,14 @@ export default function Home() {
         });
       });
     }
+
+    fetch('/api/os')
+      .then((res) => res.json())
+      .then((data) => {
+        setOsPlatform(data.platform);
+        setOsRelease(data.release);
+      })
+      .catch((err) => console.error('Failed to fetch OS version:', err));
   }, []);
 
   function initializeBeams() {
@@ -142,19 +152,22 @@ export default function Home() {
         </Button>
       </div>
       <div className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-xl">
           <CardHeader>
             <CardTitle className="text-2xl">Pusher Beams Notification Tester</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-lg flex items-center gap-4">
+            <div className="text-lg flex flex-col gap-2">
               <span className="flex items-center gap-1">
                 <FontAwesomeIcon icon={osIcon} className="w-4 h-4" /> OS: <span className="font-bold">{os}</span>
               </span>
               <span className="flex items-center gap-1">
+                Version: <span className="font-bold">{osPlatform} {osRelease}</span>
+              </span>
+              <span className="flex items-center gap-1">
                 <FontAwesomeIcon icon={browserIcon} className="w-4 h-4" /> Browser: <span className="font-bold">{browser}</span>
               </span>
-            </p>
+            </div>
             <p className="text-lg">
               Web push notifications are{' '}
               <Badge className={isPusherSupported ? 'bg-green-500 text-white' : ''} variant={isPusherSupported ? 'default' : 'destructive'}>

@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDesktop, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { faWindows, faApple, faLinux, faAndroid, faChrome, faFirefox, faSafari, faEdge } from '@fortawesome/free-brands-svg-icons';
 
 declare global {
   interface Window {
@@ -17,20 +23,25 @@ declare global {
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [isPusherSupported, setIsPusherSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [os, setOs] = useState<string>('');
   const [browser, setBrowser] = useState<string>('');
+  const [osIcon, setOsIcon] = useState(faDesktop);
+  const [browserIcon, setBrowserIcon] = useState(faGlobe);
 
   useEffect(() => {
-    // Detect OS
+    setMounted(true);
     const userAgent = navigator.userAgent;
     let detectedOS = 'Unknown';
-    if (userAgent.indexOf('Win') !== -1) detectedOS = 'Windows';
+    if (userAgent.indexOf('iPad') !== -1) detectedOS = 'iPadOS';
+    else if (userAgent.indexOf('iPhone') !== -1) detectedOS = 'iOS';
+    else if (userAgent.indexOf('iPod') !== -1) detectedOS = 'iOS';
+    else if (userAgent.indexOf('Win') !== -1) detectedOS = 'Windows';
     else if (userAgent.indexOf('Mac') !== -1) detectedOS = 'macOS';
     else if (userAgent.indexOf('Linux') !== -1) detectedOS = 'Linux';
     else if (userAgent.indexOf('Android') !== -1) detectedOS = 'Android';
-    else if (userAgent.indexOf('like Mac') !== -1) detectedOS = 'iOS';
     setOs(detectedOS);
 
     // Detect Browser
@@ -41,6 +52,20 @@ export default function Home() {
     else if (userAgent.indexOf('Edge') !== -1) detectedBrowser = 'Edge';
     else if (userAgent.indexOf('Opera') !== -1) detectedBrowser = 'Opera';
     setBrowser(detectedBrowser);
+
+    let osIcon = faDesktop;
+    if (detectedOS === 'Windows') osIcon = faWindows;
+    else if (['macOS', 'iOS', 'iPadOS'].includes(detectedOS)) osIcon = faApple;
+    else if (detectedOS === 'Linux') osIcon = faLinux;
+    else if (detectedOS === 'Android') osIcon = faAndroid;
+    setOsIcon(osIcon);
+
+    let browserIcon = faGlobe;
+    if (detectedBrowser === 'Chrome') browserIcon = faChrome;
+    else if (detectedBrowser === 'Firefox') browserIcon = faFirefox;
+    else if (detectedBrowser === 'Safari') browserIcon = faSafari;
+    else if (detectedBrowser === 'Edge') browserIcon = faEdge;
+    setBrowserIcon(browserIcon);
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
@@ -107,47 +132,55 @@ export default function Home() {
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <header className="row-start-1 flex justify-end w-full">
-        <button
+      <div className="row-start-1 flex justify-end w-full">
+        <Button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          variant="outline"
+          className="cursor-pointer"
         >
           {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-        </button>
-      </header>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold">Pusher Beams Notification Tester</h1>
-        <div className="text-center">
-          <p className="text-lg">
-            OS: <span className="font-bold">{os}</span> | Browser:{' '}
-            <span className="font-bold">{browser}</span>
-          </p>
-          <p className="text-lg">
-            Web push notifications are
-            <span
-              className={`font-bold ${
-                isPusherSupported ? 'text-green-500' : 'text-red-500'
-              }`}
-            >
-              {isPusherSupported ? ' supported' : ' not supported'}
-            </span>{' '}
-            in this browser.
-          </p>
-          {isSubscribed && (
-            <p className="text-lg text-green-500 font-bold">
-              Yayy! The notification is working!
+        </Button>
+      </div>
+      <div className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Pusher Beams Notification Tester</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-lg flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <FontAwesomeIcon icon={osIcon} className="w-4 h-4" /> OS: <span className="font-bold">{os}</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <FontAwesomeIcon icon={browserIcon} className="w-4 h-4" /> Browser: <span className="font-bold">{browser}</span>
+              </span>
             </p>
-          )}
-          {isPusherSupported && (
-            <button
-              onClick={sendTestNotification}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Send Test Notification
-            </button>
-          )}
-        </div>
-      </main>
+            <p className="text-lg">
+              Web push notifications are{' '}
+              <Badge className={isPusherSupported ? 'bg-green-500 text-white' : ''} variant={isPusherSupported ? 'default' : 'destructive'}>
+                {isPusherSupported ? 'Supported' : 'Not Supported'}
+              </Badge>{' '}
+              in this browser.
+            </p>
+            {isPusherSupported && (
+              <p className="text-lg">
+                Subscription status:{' '}
+                <Badge className="bg-green-500 text-white" variant="default">
+                  {isSubscribed ? 'Subscribed' : 'Not Subscribed'}
+                </Badge>
+              </p>
+            )}
+            {isPusherSupported && (
+              <Button
+                onClick={sendTestNotification}
+                className={`w-full cursor-pointer mt-4 ${!mounted && 'invisible'}`}
+              >
+                Send Test Notification
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

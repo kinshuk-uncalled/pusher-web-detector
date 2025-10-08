@@ -28,7 +28,6 @@ export default function Home() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [os, setOs] = useState<string>('');
   const [browser, setBrowser] = useState<string>('');
-  const [osPlatform, setOsPlatform] = useState<string>('');
   const [osRelease, setOsRelease] = useState<string>('');
   const [osIcon, setOsIcon] = useState(faDesktop);
   const [browserIcon, setBrowserIcon] = useState(faGlobe);
@@ -92,13 +91,22 @@ export default function Home() {
       });
     }
 
-    fetch('/api/os')
-      .then((res) => res.json())
-      .then((data) => {
-        setOsPlatform(data.platform);
-        setOsRelease(data.release);
-      })
-      .catch((err) => console.error('Failed to fetch OS version:', err));
+    // Parse OS version from userAgent
+    let version = '';
+    if (userAgent.includes('Windows NT')) {
+      const match = userAgent.match(/Windows NT (\d+\.\d+)/);
+      version = match ? match[1] : '';
+    } else if (userAgent.includes('Mac OS X')) {
+      const match = userAgent.match(/Mac OS X (\d+_\d+_\d+)/);
+      version = match ? match[1].replace(/_/g, '.') : '';
+    } else if (userAgent.includes('iPhone OS') || userAgent.includes('iPadOS') || userAgent.includes('iPod OS')) {
+      const match = userAgent.match(/(iPhone|iPad|iPod) OS (\d+_\d+(_\d+)?)/);
+      version = match ? match[2].replace(/_/g, '.') : '';
+    } else if (userAgent.includes('Android')) {
+      const match = userAgent.match(/Android (\d+)/);
+      version = match ? match[1] : '';
+    }
+    setOsRelease(version);
   }, []);
 
   function initializeBeams() {
@@ -162,7 +170,7 @@ export default function Home() {
                 <FontAwesomeIcon icon={osIcon} className="w-4 h-4" /> OS: <span className="font-bold">{os}</span>
               </span>
               <span className="flex items-center gap-1">
-                Version: <span className="font-bold">{osPlatform} {osRelease}</span>
+                Version: <span className="font-bold">{os} {osRelease}</span>
               </span>
               <span className="flex items-center gap-1">
                 <FontAwesomeIcon icon={browserIcon} className="w-4 h-4" /> Browser: <span className="font-bold">{browser}</span>
